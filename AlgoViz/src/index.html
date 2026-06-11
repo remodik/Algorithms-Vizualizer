@@ -1,1351 +1,1989 @@
 <!doctype html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Алгоритмы — визуализатор</title>
-        <style>
-            @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;700&display=swap");
-            *,
-            *::before,
-            *::after {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-            :root {
-                --bg: #0e0e11;
-                --surface: #16161a;
-                --surface2: #1e1e24;
-                --border: rgba(255, 255, 255, 0.07);
-                --text: #e8e8f0;
-                --muted: #7a7a8c;
-                --blue: #4f8ef7;
-                --amber: #f0a030;
-                --red: #e85555;
-                --green: #3ec98a;
-                --purple: #9b6dff;
-                --teal: #2dd4bf;
-                --cyan: #22d3ee;
-                --pink: #f472b6;
-                --radius: 10px;
-                --font-mono: "JetBrains Mono", monospace;
-                --font-display: "Unbounded", sans-serif;
-            }
-            body {
-                font-family: var(--font-mono);
-                background: var(--bg);
-                color: var(--text);
-                min-height: 100vh;
-                padding: 2rem 1.5rem;
-                max-width: 1000px;
-                margin: 0 auto;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Алгоритмы — визуализатор</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;700&display=swap");
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            /* ── Surfaces & text ── */
+            --bg: #0e0e11;
+            --surface: #16161a;
+            --surface2: #1e1e24;
+            --surface3: #26262e;
+            --border: rgba(255, 255, 255, 0.07);
+            --border-strong: rgba(255, 255, 255, 0.15);
+            --text: #e8e8f0;
+            --text-dim: #b8b8cc;
+            --muted: #7a7a8c;
+            --faint: #666680;
+            --code: #c9d1d9;
 
-            h1 {
-                font-family: var(--font-display);
-                font-size: 18px;
-                font-weight: 700;
-                letter-spacing: -0.5px;
-                color: var(--text);
-                margin-bottom: 1.5rem;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            h1 span.accent {
-                color: var(--blue);
-            }
+            /* ── Brand / state palette ── */
+            --blue: #4f8ef7;
+            --amber: #f0a030;
+            --red: #e85555;
+            --green: #3ec98a;
+            --purple: #9b6dff;
+            --teal: #2dd4bf;
+            --cyan: #22d3ee;
+            --pink: #f472b6;
+            --excluded: #2a2a35;
 
-            .header-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 1.5rem;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
+            /* ── Radius scale ── */
+            --radius-xs: 4px;
+            --radius-sm: 6px;
+            --radius: 10px;
 
-            .lang-selector {
-                display: flex;
-                gap: 3px;
-                background: var(--surface);
-                padding: 4px;
-                border-radius: var(--radius);
-                border: 1px solid var(--border);
-                flex-wrap: wrap;
-            }
-            .lang-btn {
-                padding: 5px 10px;
-                border-radius: 6px;
-                border: none;
-                background: transparent;
-                color: var(--muted);
-                cursor: pointer;
-                font-size: 10px;
-                font-family: var(--font-mono);
-                font-weight: 500;
-                transition: all 0.15s;
-            }
-            .lang-btn:hover {
-                color: var(--text);
-            }
-            .lang-btn.active {
-                background: var(--surface2);
-                color: var(--blue);
-            }
+            /* ── Spacing scale ── */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 24px;
 
-            .tabs {
-                display: flex;
-                gap: 6px;
-                margin-bottom: 1.5rem;
-                border-bottom: 1px solid var(--border);
-                padding-bottom: 0;
-                flex-wrap: wrap;
-            }
-            .tab {
-                padding: 8px 16px;
-                border-radius: var(--radius) var(--radius) 0 0;
-                border: 1px solid transparent;
-                background: transparent;
-                color: var(--muted);
-                cursor: pointer;
-                font-size: 11px;
-                font-family: var(--font-mono);
-                font-weight: 500;
-                transition: all 0.15s;
-                border-bottom: none;
-                position: relative;
-                bottom: -1px;
-            }
-            .tab:hover {
-                color: var(--text);
-            }
-            .tab.active {
-                background: var(--surface);
-                color: var(--blue);
-                border-color: var(--border);
-                border-bottom-color: var(--surface);
-            }
+            /* ── Type scale ── */
+            --text-2xs: 9px;
+            --text-xs: 10px;
+            --text-sm: 11px;
+            --text-md: 12px;
+            --text-lg: 13px;
+            --text-xl: 18px;
 
-            .section {
-                display: none;
-            }
-            .section.active {
-                display: block;
-            }
+            /* ── Motion ── */
+            --dur-fast: 0.15s;
+            --dur-med: 0.2s;
+            --ease: ease;
 
-            .algo-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-                gap: 8px;
-                margin-bottom: 1.5rem;
-            }
-            .algo-card {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 12px 14px;
-                cursor: pointer;
-                transition: all 0.15s;
-            }
-            .algo-card:hover {
-                border-color: rgba(255, 255, 255, 0.15);
-            }
-            .algo-card.selected {
-                border-color: var(--blue);
-                background: rgba(79, 142, 247, 0.08);
-            }
-            .algo-name {
-                font-size: 12px;
-                font-weight: 500;
-                margin-bottom: 4px;
-                color: var(--text);
-            }
-            .algo-meta {
-                display: flex;
-                gap: 6px;
-                align-items: center;
-                flex-wrap: wrap;
-                margin-bottom: 4px;
-            }
-            .badge {
-                display: inline-block;
-                padding: 2px 7px;
-                border-radius: 4px;
-                font-size: 10px;
-                font-weight: 700;
-                font-family: var(--font-mono);
-            }
-            .badge-green {
-                background: rgba(62, 201, 138, 0.15);
-                color: var(--green);
-            }
-            .badge-amber {
-                background: rgba(240, 160, 48, 0.15);
-                color: var(--amber);
-            }
-            .badge-red {
-                background: rgba(232, 85, 85, 0.15);
-                color: var(--red);
-            }
-            .badge-purple {
-                background: rgba(155, 109, 255, 0.15);
-                color: var(--purple);
-            }
-            .badge-cyan {
-                background: rgba(34, 211, 238, 0.15);
-                color: var(--cyan);
-            }
-            .badge-pink {
-                background: rgba(244, 114, 182, 0.15);
-                color: var(--pink);
-            }
-            .badge-teal {
-                background: rgba(45, 212, 191, 0.15);
-                color: var(--teal);
-            }
-            .algo-sub {
-                font-size: 10px;
-                color: var(--muted);
-                margin-top: 2px;
-            }
+            /* ── Focus ring (keyboard accessibility) ── */
+            --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--blue);
 
-            .algo-card[data-desc]:hover::after {
-                content: attr(data-desc);
-                position: absolute;
-                left: 0;
-                top: calc(100% + 6px);
-                background: var(--surface2);
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                padding: 8px 12px;
-                font-size: 10px;
-                color: var(--muted);
-                width: 220px;
-                z-index: 10;
-                line-height: 1.6;
-                pointer-events: none;
-                white-space: normal;
-            }
-            .algo-card {
-                position: relative;
-            }
+            --font-mono: "JetBrains Mono", monospace;
+            --font-display: "Unbounded", sans-serif;
+        }
+        body {
+            font-family: var(--font-mono),serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-            .legend {
-                display: flex;
-                gap: 14px;
-                flex-wrap: wrap;
-                margin-bottom: 1rem;
-            }
-            .legend-item {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                font-size: 11px;
-                color: var(--muted);
-            }
-            .legend-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 2px;
-            }
+        h1 {
+            font-family: var(--font-display),serif;
+            font-size: var(--text-xl);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 span.accent {
+            color: var(--blue);
+        }
 
-            .viz-area {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 1rem;
-                min-height: 140px;
-                display: flex;
-                align-items: flex-end;
-                gap: 3px;
-                justify-content: center;
-                margin-bottom: 1rem;
-                overflow: hidden;
-            }
-            .bar {
-                border-radius: 3px 3px 0 0;
-                transition: background 0.15s;
-                display: flex;
-                align-items: flex-end;
-                justify-content: center;
-                padding-bottom: 2px;
-                font-size: 9px;
-                color: rgba(255, 255, 255, 0.7);
-                font-weight: 700;
-                min-width: 14px;
-            }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
 
-            .controls {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                flex-wrap: wrap;
-                margin-bottom: 0.75rem;
-            }
-            .btn {
-                padding: 7px 14px;
-                border-radius: var(--radius);
-                border: 1px solid var(--border);
-                background: var(--surface2);
-                color: var(--text);
-                cursor: pointer;
-                font-size: 11px;
-                font-family: var(--font-mono);
-                font-weight: 500;
-                transition: all 0.15s;
-                white-space: nowrap;
-            }
-            .btn:hover {
-                border-color: rgba(255, 255, 255, 0.2);
-                background: #26262e;
-            }
-            .btn:disabled {
-                opacity: 0.35;
-                cursor: default;
-            }
-            .btn-primary {
-                border-color: var(--blue);
-                color: var(--blue);
-            }
-            .btn-primary:hover {
-                background: rgba(79, 142, 247, 0.1);
-            }
-            .btn-amber {
-                border-color: var(--amber);
-                color: var(--amber);
-            }
-            .btn-amber:hover {
-                background: rgba(240, 160, 48, 0.08);
-            }
+        .lang-selector {
+            display: flex;
+            gap: 3px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .lang-btn {
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: var(--text-xs);
+            font-family: var(--font-mono),serif;
+            font-weight: 500;
+            transition: all var(--dur-fast);
+        }
+        .lang-btn:hover {
+            color: var(--text);
+        }
+        .lang-btn.active {
+            background: var(--surface2);
+            color: var(--blue);
+        }
 
-            .status {
-                font-size: 11px;
-                color: var(--muted);
-                flex: 1;
-                font-family: var(--font-mono);
-            }
-            .ops-counter {
-                font-size: 11px;
-                color: var(--purple);
-                font-family: var(--font-mono);
-                white-space: nowrap;
-            }
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 16px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            font-family: var(--font-mono),serif;
+            font-weight: 500;
+            transition: all var(--dur-fast);
+            border-bottom: none;
+            position: relative;
+            bottom: -1px;
+        }
+        .tab:hover {
+            color: var(--text);
+        }
+        .tab.active {
+            background: var(--surface);
+            color: var(--blue);
+            border-color: var(--border);
+            border-bottom-color: var(--surface);
+        }
 
-            .speed-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 11px;
-                color: var(--muted);
-                margin-bottom: 1rem;
-            }
-            input[type="range"] {
-                accent-color: var(--blue);
-                width: 100px;
-            }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
 
-            .custom-input-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 0.75rem;
-                flex-wrap: wrap;
-            }
-            .custom-input-row input[type="text"] {
-                padding: 6px 10px;
-                border-radius: var(--radius);
-                border: 1px solid var(--border);
-                background: var(--surface2);
-                color: var(--text);
-                font-size: 11px;
-                font-family: var(--font-mono);
-                width: 220px;
-            }
-            .custom-input-row label {
-                font-size: 11px;
-                color: var(--muted);
-            }
+        .algo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .algo-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all var(--dur-fast);
+        }
+        .algo-card:hover {
+            border-color: var(--border-strong);
+        }
+        .algo-card.selected {
+            border-color: var(--blue);
+            background: color-mix(in srgb, var(--blue) 8%, transparent);
+        }
+        .algo-name {
+            font-size: var(--text-md);
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+        .algo-meta {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: var(--radius-xs);
+            font-size: var(--text-xs);
+            font-weight: 700;
+            font-family: var(--font-mono), serif;
+        }
+        /* The second badge in a card = space complexity, rendered smaller. */
+        .algo-meta .badge + .badge {
+            font-size: var(--text-2xs);
+        }
+        /* Semantic badges — each colour comes from exactly one token.
+           Efficiency tier: fast / mid / slow.
+           Category accent:  graph / dp / special / aux. */
+        .badge-fast {
+            background: color-mix(in srgb, var(--green) 15%, transparent);
+            color: var(--green);
+        }
+        .badge-mid {
+            background: color-mix(in srgb, var(--amber) 15%, transparent);
+            color: var(--amber);
+        }
+        .badge-slow {
+            background: color-mix(in srgb, var(--red) 15%, transparent);
+            color: var(--red);
+        }
+        .badge-special {
+            background: color-mix(in srgb, var(--purple) 15%, transparent);
+            color: var(--purple);
+        }
+        .badge-graph {
+            background: color-mix(in srgb, var(--cyan) 15%, transparent);
+            color: var(--cyan);
+        }
+        .badge-dp {
+            background: color-mix(in srgb, var(--pink) 15%, transparent);
+            color: var(--pink);
+        }
+        .badge-aux {
+            background: color-mix(in srgb, var(--teal) 15%, transparent);
+            color: var(--teal);
+        }
+        .algo-sub {
+            font-size: var(--text-xs);
+            color: var(--muted);
+            margin-top: 2px;
+        }
 
-            .code-block {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 1rem 1.25rem;
-                font-family: var(--font-mono);
-                font-size: 11px;
-                line-height: 1.7;
-                color: #c9d1d9;
-                overflow-x: auto;
-                white-space: pre;
-                margin-top: 0.5rem;
-            }
+        .algo-card[data-desc]:hover::after {
+            content: attr(data-desc);
+            position: absolute;
+            left: 0;
+            top: calc(100% + 6px);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: var(--text-xs);
+            color: var(--muted);
+            width: 220px;
+            z-index: 10;
+            line-height: 1.6;
+            pointer-events: none;
+            white-space: normal;
+        }
+        .algo-card {
+            position: relative;
+        }
 
-            .search-row {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                margin-bottom: 1rem;
-                flex-wrap: wrap;
-            }
-            .search-row input[type="number"] {
-                padding: 7px 12px;
-                border-radius: var(--radius);
-                border: 1px solid var(--border);
-                background: var(--surface2);
-                color: var(--text);
-                font-size: 12px;
-                font-family: var(--font-mono);
-                width: 80px;
-            }
+        .legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: var(--text-sm);
+            color: var(--muted);
+        }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
 
-            .graph-viz {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 1rem;
-                min-height: 300px;
-                margin-bottom: 1rem;
-                position: relative;
-            }
-            .graph-canvas {
-                width: 100%;
-                height: 300px;
-            }
+        .viz-area {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 140px;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            justify-content: center;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .bar {
+            border-radius: 3px 3px 0 0;
+            transition: background var(--dur-fast);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 2px;
+            font-size: var(--text-2xs);
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 700;
+            min-width: 14px;
+        }
 
-            .dp-viz {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 1rem;
-                margin-bottom: 1rem;
-                min-height: 100px;
-            }
-            .dp-grid {
-                display: grid;
-                gap: 3px;
-                margin-bottom: 1rem;
-            }
-            .dp-cell {
-                aspect-ratio: 1;
-                background: var(--surface2);
-                border: 1px solid var(--border);
-                border-radius: 5px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                font-size: 11px;
-                font-weight: 500;
-                transition: all 0.2s;
-            }
-            .dp-cell.computing {
-                background: rgba(240, 160, 48, 0.2);
-                border-color: var(--amber);
-            }
-            .dp-cell.computed {
-                background: rgba(62, 201, 138, 0.2);
-                border-color: var(--green);
-            }
-            .dp-cell.current {
-                background: rgba(79, 142, 247, 0.25);
-                border-color: var(--blue);
-                box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.3);
-            }
-            .fib-sequence {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            .fib-item {
-                background: var(--surface2);
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                padding: 8px 12px;
-                text-align: center;
-                min-width: 52px;
-                font-size: 13px;
-                font-weight: 700;
-                transition: all 0.2s;
-            }
-            .fib-item.computing {
-                background: rgba(240, 160, 48, 0.2);
-                border-color: var(--amber);
-            }
-            .fib-item.computed {
-                background: rgba(62, 201, 138, 0.2);
-                border-color: var(--green);
-            }
-            .fib-item.current {
-                background: rgba(79, 142, 247, 0.2);
-                border-color: var(--blue);
-            }
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        .btn {
+            padding: 7px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            font-family: var(--font-mono),serif;
+            font-weight: 500;
+            transition: all var(--dur-fast);
+            white-space: nowrap;
+        }
+        .btn:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface3);
+        }
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+        .btn-primary {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--blue) 10%, transparent);
+        }
+        .btn-amber {
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .btn-amber:hover {
+            background: color-mix(in srgb, var(--amber) 8%, transparent);
+        }
 
-            .algo-info-panel {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 10px 14px;
-                margin-bottom: 1rem;
-                font-size: 11px;
-                color: var(--muted);
-                line-height: 1.6;
-                display: none;
-            }
-            .algo-info-panel.visible {
-                display: block;
-            }
-            .algo-info-title {
-                color: var(--text);
-                font-weight: 700;
-                margin-bottom: 4px;
-                font-size: 12px;
-            }
+        /* ── Keyboard focus ring (was missing entirely) ── */
+        .btn:focus-visible,
+        .tab:focus-visible,
+        .lang-btn:focus-visible,
+        .algo-card:focus-visible,
+        .input:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
 
-            .kw {
-                color: #ff79c6;
-            }
-            .fn {
-                color: #50fa7b;
-            }
-            .cm {
-                color: #6272a4;
-            }
-            .nm {
-                color: #bd93f9;
-            }
-            .st {
-                color: #f1fa8c;
-            }
-            .ty {
-                color: #8be9fd;
-            }
+        .status {
+            font-size: var(--text-sm);
+            color: var(--muted);
+            flex: 1;
+            font-family: var(--font-mono),serif;
+        }
+        .ops-counter {
+            font-size: var(--text-sm);
+            color: var(--purple);
+            font-family: var(--font-mono),serif;
+            white-space: nowrap;
+        }
 
-            .section-divider {
-                border: none;
-                border-top: 1px solid var(--border);
-                margin: 1rem 0;
-            }
+        .speed-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--text-sm);
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        input[type="range"] {
+            accent-color: var(--blue);
+            width: 100px;
+        }
 
-            .desc-block {
-                margin-top: 0.75rem;
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                overflow: hidden;
-                animation: descFadeIn 0.2s ease;
+        .custom-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+        /* Unified input — one declaration, width set per context. */
+        .input {
+            padding: 7px 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: var(--text-sm);
+            font-family: var(--font-mono), serif;
+        }
+        .custom-input-row .input {
+            width: 220px;
+        }
+        .custom-input-row label {
+            font-size: var(--text-sm);
+            color: var(--muted);
+        }
+
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            font-family: var(--font-mono),serif;
+            font-size: var(--text-sm);
+            line-height: 1.7;
+            color: var(--code);
+            overflow-x: auto;
+            white-space: pre;
+            margin-top: 0.5rem;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .search-row .input {
+            width: 80px;
+        }
+
+        .graph-viz {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 300px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .graph-canvas {
+            width: 100%;
+            height: 300px;
+        }
+
+        .dp-viz {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            min-height: 100px;
+        }
+        .dp-grid {
+            display: grid;
+            gap: 3px;
+            margin-bottom: 1rem;
+        }
+        .dp-cell {
+            width: 36px;
+            height: 36px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            transition: all var(--dur-med);
+            box-sizing: border-box;
+        }
+        /* Larger variant — used for the Fibonacci sequence (was .fib-item). */
+        .dp-cell.lg {
+            width: auto;
+            height: auto;
+            min-width: 52px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: var(--text-lg);
+            font-weight: 700;
+        }
+        .dp-cell.computing {
+            background: color-mix(in srgb, var(--amber) 20%, transparent);
+            border-color: var(--amber);
+        }
+        .dp-cell.computed {
+            background: color-mix(in srgb, var(--green) 20%, transparent);
+            border-color: var(--green);
+        }
+        .dp-cell.current {
+            background: color-mix(in srgb, var(--blue) 25%, transparent);
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue) 30%, transparent);
+        }
+        .fib-sequence {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .algo-info-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 1rem;
+            font-size: var(--text-sm);
+            color: var(--muted);
+            line-height: 1.6;
+            display: none;
+        }
+        .algo-info-panel.visible {
+            display: block;
+        }
+        .algo-info-title {
+            color: var(--text);
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: var(--text-md);
+        }
+
+        .kw {
+            color: #ff79c6;
+        }
+        .fn {
+            color: #50fa7b;
+        }
+        .cm {
+            color: #6272a4;
+        }
+        .nm {
+            color: #bd93f9;
+        }
+        .st {
+            color: #f1fa8c;
+        }
+        .ty {
+            color: #8be9fd;
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+
+        .desc-block {
+            margin-top: 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            animation: descFadeIn 0.2s ease;
+        }
+        @keyframes descFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
             }
-            @keyframes descFadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(6px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-            .desc-header {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 14px 18px 12px;
-                border-bottom: 1px solid var(--border);
-                background: var(--surface2);
-            }
-            .desc-title {
-                font-family: var(--font-display);
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--text);
-                letter-spacing: -0.3px;
-            }
-            .desc-badge {
-                font-size: 10px;
-                font-weight: 700;
-                padding: 2px 8px;
-                border-radius: 4px;
-                font-family: var(--font-mono);
-            }
-            .desc-stable {
-                background: rgba(62, 201, 138, 0.15);
-                color: var(--green);
-            }
-            .desc-unstable {
-                background: rgba(232, 85, 85, 0.15);
-                color: var(--red);
-            }
-            .desc-section {
-                padding: 12px 18px 4px;
-            }
-            .desc-label {
-                font-size: 9px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
-                color: var(--muted);
-                margin-bottom: 7px;
-            }
-            .desc-idea,
-            .desc-when {
-                font-size: 11.5px;
-                line-height: 1.8;
-                color: #b8b8cc;
-                font-family: var(--font-mono);
-            }
-            .desc-when {
-                padding-bottom: 14px;
-            }
-            .desc-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 11px;
-                font-family: var(--font-mono);
-                margin-bottom: 4px;
-            }
-            .desc-table th {
-                text-align: left;
-                color: var(--muted);
-                font-weight: 600;
-                font-size: 10px;
-                padding: 4px 10px 6px 0;
-                border-bottom: 1px solid var(--border);
-            }
-            .desc-table td {
-                padding: 5px 10px 5px 0;
-                vertical-align: top;
-            }
-            .desc-table tr:not(:last-child) td {
-                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            }
-            .desc-tc-case {
-                color: var(--muted);
-                width: 170px;
-            }
-            .desc-tc-time {
-                color: var(--amber);
-                font-weight: 700;
-                width: 140px;
-            }
-            .desc-tc-space {
-                color: var(--cyan);
-                font-weight: 700;
-                width: 70px;
-            }
-            .desc-tc-note {
-                color: #666680;
-                font-size: 10px;
-            }
-            .desc-pros-cons {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                border-top: 1px solid var(--border);
-                border-bottom: 1px solid var(--border);
-                margin: 8px 0 0;
-            }
-            .desc-pros-cons .desc-section:first-child {
-                border-right: 1px solid var(--border);
-            }
-            .desc-list {
-                list-style: none;
-                padding: 0;
-                margin: 0 0 10px;
-            }
-            .desc-list li {
-                font-size: 11px;
-                line-height: 1.65;
-                padding: 2px 0;
-                font-family: var(--font-mono);
-            }
-            .desc-pro {
-                color: #3ec98a;
-            }
-            .desc-con {
-                color: #e85555;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header-row">
-            <h1>// <span class="accent">алгоритмы</span></h1>
-            <div class="lang-selector">
-                <button
-                    class="lang-btn active"
-                    data-lang="js"
-                    onclick="switchLang('js')"
-                >
-                    JS
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="python"
-                    onclick="switchLang('python')"
-                >
-                    Python
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="cpp"
-                    onclick="switchLang('cpp')"
-                >
-                    C++
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="java"
-                    onclick="switchLang('java')"
-                >
-                    Java
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="go"
-                    onclick="switchLang('go')"
-                >
-                    Go
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="rust"
-                    onclick="switchLang('rust')"
-                >
-                    Rust
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="kotlin"
-                    onclick="switchLang('kotlin')"
-                >
-                    Kotlin
-                </button>
-                <button
-                    class="lang-btn"
-                    data-lang="swift"
-                    onclick="switchLang('swift')"
-                >
-                    Swift
-                </button>
+        }
+        .desc-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface2);
+        }
+        .desc-title {
+            font-family: var(--font-display),serif;
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .desc-badge {
+            font-size: var(--text-xs);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: var(--radius-xs);
+            font-family: var(--font-mono),serif;
+        }
+        .desc-stable {
+            background: color-mix(in srgb, var(--green) 15%, transparent);
+            color: var(--green);
+        }
+        .desc-unstable {
+            background: color-mix(in srgb, var(--red) 15%, transparent);
+            color: var(--red);
+        }
+        .desc-section {
+            padding: 12px 18px 4px;
+        }
+        .desc-label {
+            font-size: var(--text-2xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+        .desc-idea,
+        .desc-when {
+            font-size: 11.5px;
+            line-height: 1.8;
+            color: var(--text-dim);
+            font-family: var(--font-mono),serif;
+        }
+        .desc-when {
+            padding-bottom: 14px;
+        }
+        .desc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--text-sm);
+            font-family: var(--font-mono),serif;
+            margin-bottom: 4px;
+        }
+        .desc-table th {
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: var(--text-xs);
+            padding: 4px 10px 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .desc-table td {
+            padding: 5px 10px 5px 0;
+            vertical-align: top;
+        }
+        .desc-table tr:not(:last-child) td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .desc-tc-case {
+            color: var(--muted);
+            width: 170px;
+        }
+        .desc-tc-time {
+            color: var(--amber);
+            font-weight: 700;
+            width: 140px;
+        }
+        .desc-tc-space {
+            color: var(--cyan);
+            font-weight: 700;
+            width: 70px;
+        }
+        .desc-tc-note {
+            color: var(--faint);
+            font-size: var(--text-xs);
+        }
+        .desc-pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 8px 0 0;
+        }
+        .desc-pros-cons .desc-section:first-child {
+            border-right: 1px solid var(--border);
+        }
+        .desc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 10px;
+        }
+        .desc-list li {
+            font-size: var(--text-sm);
+            line-height: 1.65;
+            padding: 2px 0;
+            font-family: var(--font-mono),serif;
+        }
+        .desc-pro {
+            color: var(--green);
+        }
+        .desc-con {
+            color: var(--red);
+        }
+    </style>
+</head>
+<body>
+<div class="header-row">
+    <h1>// <span class="accent">алгоритмы</span></h1>
+    <div class="lang-selector">
+        <button
+                class="lang-btn active"
+                data-lang="js"
+                onclick="switchLang('js')"
+        >
+            JS
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="python"
+                onclick="switchLang('python')"
+        >
+            Python
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="cpp"
+                onclick="switchLang('cpp')"
+        >
+            C++
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="java"
+                onclick="switchLang('java')"
+        >
+            Java
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="go"
+                onclick="switchLang('go')"
+        >
+            Go
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="rust"
+                onclick="switchLang('rust')"
+        >
+            Rust
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="kotlin"
+                onclick="switchLang('kotlin')"
+        >
+            Kotlin
+        </button>
+        <button
+                class="lang-btn"
+                data-lang="swift"
+                onclick="switchLang('swift')"
+        >
+            Swift
+        </button>
+    </div>
+</div>
+
+<div class="tabs">
+    <button class="tab active" onclick="switchSection('sort', this)">
+        Сортировки
+    </button>
+    <button class="tab" onclick="switchSection('search', this)">
+        Поиск
+    </button>
+    <button class="tab" onclick="switchSection('graph', this)">
+        Графы
+    </button>
+    <button class="tab" onclick="switchSection('dp', this)">DP</button>
+    <button class="tab" onclick="switchSection('hash', this)">Хеш</button>
+    <button class="tab" onclick="switchSection('backtrack', this)">
+        Backtracking
+    </button>
+    <button class="tab" onclick="switchSection('string', this)">
+        Строки
+    </button>
+    <button class="tab" onclick="switchSection('tree', this)">
+        Деревья
+    </button>
+</div>
+
+<div class="section active" id="section-sort">
+    <div class="algo-grid">
+        <div
+                class="algo-card selected"
+                id="card-bubble"
+                onclick="selectAlgo('bubble')"
+                data-desc="Попарное сравнение соседей. Просто, но медленно. Хорошо для обучения."
+        >
+            <div class="algo-name">Bubble sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-slow">O(n²)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
             </div>
+            <div class="algo-sub">стабильный</div>
         </div>
-
-        <div class="tabs">
-            <button class="tab active" onclick="switchSection('sort', this)">
-                Сортировки
-            </button>
-            <button class="tab" onclick="switchSection('search', this)">
-                Поиск
-            </button>
-            <button class="tab" onclick="switchSection('graph', this)">
-                Графы
-            </button>
-            <button class="tab" onclick="switchSection('dp', this)">DP</button>
+        <div
+                class="algo-card"
+                id="card-selection"
+                onclick="selectAlgo('selection')"
+                data-desc="Ищет минимум в остатке и ставит его на место. Мало обменов."
+        >
+            <div class="algo-name">Selection sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-slow">O(n²)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">нестабильный</div>
         </div>
-
-        <div class="section active" id="section-sort">
-            <div class="algo-grid">
-                <div
-                    class="algo-card selected"
-                    id="card-bubble"
-                    onclick="selectAlgo('bubble')"
-                    data-desc="Попарное сравнение соседей. Просто, но медленно. Хорошо для обучения."
-                >
-                    <div class="algo-name">Bubble sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-red">O(n²)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">стабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-selection"
-                    onclick="selectAlgo('selection')"
-                    data-desc="Ищет минимум в остатке и ставит его на место. Мало обменов."
-                >
-                    <div class="algo-name">Selection sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-red">O(n²)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">нестабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-insertion"
-                    onclick="selectAlgo('insertion')"
-                    data-desc="Вставляет каждый элемент на нужное место. O(n) на почти отсортированных."
-                >
-                    <div class="algo-name">Insertion sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-amber">O(n²)/O(n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">стабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-shell"
-                    onclick="selectAlgo('shell')"
-                    data-desc="Insertion sort с переменным шагом. Быстрее за счёт дальних перестановок."
-                >
-                    <div class="algo-name">Shell sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-amber">O(n log n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">нестабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-quick"
-                    onclick="selectAlgo('quick')"
-                    data-desc="Рекурсивный раздел вокруг pivot. В среднем O(n log n). На практике самый быстрый."
-                >
-                    <div class="algo-name">Quick sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(n log n)</span
-                        ><span class="badge badge-amber" style="font-size: 9px"
-                            >O(log n)</span
-                        >
-                    </div>
-                    <div class="algo-sub">нестабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-merge"
-                    onclick="selectAlgo('merge')"
-                    data-desc="Делит пополам и сливает. Гарантированный O(n log n). Хорош для внешней сортировки."
-                >
-                    <div class="algo-name">Merge sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(n log n)</span
-                        ><span class="badge badge-amber" style="font-size: 9px"
-                            >O(n)</span
-                        >
-                    </div>
-                    <div class="algo-sub">стабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-heap"
-                    onclick="selectAlgo('heap')"
-                    data-desc="Строит max-heap и извлекает максимумы. Гарантированный O(n log n) без доп. памяти."
-                >
-                    <div class="algo-name">Heap sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(n log n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">нестабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-radix"
-                    onclick="selectAlgo('radix')"
-                    data-desc="Сортировка по разрядам числа. O(nk) — быстрее сравнительных при маленьком k."
-                >
-                    <div class="algo-name">Radix sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-purple">O(nk)</span
-                        ><span class="badge badge-amber" style="font-size: 9px"
-                            >O(n+k)</span
-                        >
-                    </div>
-                    <div class="algo-sub">стабильный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-counting"
-                    onclick="selectAlgo('counting')"
-                    data-desc="Считает вхождения каждого значения. O(n+k). Только для целых чисел в ограниченном диапазоне."
-                >
-                    <div class="algo-name">Counting sort</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-teal">O(n+k)</span
-                        ><span class="badge badge-amber" style="font-size: 9px"
-                            >O(k)</span
-                        >
-                    </div>
-                    <div class="algo-sub">стабильный</div>
-                </div>
+        <div
+                class="algo-card"
+                id="card-insertion"
+                onclick="selectAlgo('insertion')"
+                data-desc="Вставляет каждый элемент на нужное место. O(n) на почти отсортированных."
+        >
+            <div class="algo-name">Insertion sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-mid">O(n²)/O(n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
             </div>
-
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #4f8ef7"></div>
-                    обычный
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #f0a030"></div>
-                    сравниваем
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #e85555"></div>
-                    меняем
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #9b6dff"></div>
-                    pivot
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #3ec98a"></div>
-                    готово
-                </div>
+            <div class="algo-sub">стабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-shell"
+                onclick="selectAlgo('shell')"
+                data-desc="Insertion sort с переменным шагом. Быстрее за счёт дальних перестановок."
+        >
+            <div class="algo-name">Shell sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-mid">O(n log n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
             </div>
-
-            <div class="viz-area" id="sort-viz"></div>
-
-            <div class="custom-input-row">
-                <label>Свой массив:</label>
-                <input
-                    type="text"
-                    id="custom-arr-input"
-                    placeholder="напр. 42, 17, 85, 33, 61"
-                    oninput="resetSort()"
-                />
+            <div class="algo-sub">нестабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-quick"
+                onclick="selectAlgo('quick')"
+                data-desc="Рекурсивный раздел вокруг pivot. В среднем O(n log n). На практике самый быстрый."
+        >
+            <div class="algo-name">Quick sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(n log n)</span
+                        ><span class="badge badge-mid"            >O(log n)</span
+            >
             </div>
-
-            <div class="controls">
-                <button
-                    class="btn btn-primary"
-                    id="btn-run"
-                    onclick="runSort()"
-                >
-                    ▶ Запустить
-                </button>
-                <button class="btn" onclick="resetSort()">↺ Сбросить</button>
-                <span class="status" id="sort-status"
-                    >Выбери алгоритм и нажми «Запустить»</span
-                >
-                <span class="ops-counter" id="sort-ops">операций: 0</span>
+            <div class="algo-sub">нестабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-merge"
+                onclick="selectAlgo('merge')"
+                data-desc="Делит пополам и сливает. Гарантированный O(n log n). Хорош для внешней сортировки."
+        >
+            <div class="algo-name">Merge sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(n log n)</span
+                        ><span class="badge badge-mid"            >O(n)</span
+            >
             </div>
+            <div class="algo-sub">стабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-heap"
+                onclick="selectAlgo('heap')"
+                data-desc="Строит max-heap и извлекает максимумы. Гарантированный O(n log n) без доп. памяти."
+        >
+            <div class="algo-name">Heap sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(n log n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">нестабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-radix"
+                onclick="selectAlgo('radix')"
+                data-desc="Сортировка по разрядам числа. O(nk) — быстрее сравнительных при маленьком k."
+        >
+            <div class="algo-name">Radix sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-special">O(nk)</span
+                        ><span class="badge badge-mid"            >O(n+k)</span
+            >
+            </div>
+            <div class="algo-sub">стабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-counting"
+                onclick="selectAlgo('counting')"
+                data-desc="Считает вхождения каждого значения. O(n+k). Только для целых чисел в ограниченном диапазоне."
+        >
+            <div class="algo-name">Counting sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-aux">O(n+k)</span
+                        ><span class="badge badge-mid"            >O(k)</span
+            >
+            </div>
+            <div class="algo-sub">стабильный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-timsort"
+                onclick="selectAlgo('timsort')"
+                data-desc="Гибрид Insertion+Merge. O(n) на почти отсортированных. Используется в Python и Java."
+        >
+            <div class="algo-name">Tim sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(n log n)</span
+                        ><span class="badge badge-mid"            >O(n)</span
+            >
+            </div>
+            <div class="algo-sub">стабильный</div>
+        </div>
+    </div>
 
-            <div class="speed-row">
-                <span>Скорость</span>
-                <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value="3"
-                    id="speed-slider"
-                    oninput="
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--blue)"></div>
+            обычный
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            сравниваем
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--red)"></div>
+            меняем
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--purple)"></div>
+            pivot
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            готово
+        </div>
+    </div>
+
+    <div class="viz-area" id="sort-viz"></div>
+
+    <div class="custom-input-row">
+        <label>Свой массив:</label>
+        <label for="custom-arr-input"></label><input
+                type="text"
+                class="input"
+                id="custom-arr-input"
+                placeholder="напр. 42, 17, 85, 33, 61"
+                oninput="resetSort()"
+        />
+    </div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-run"
+                onclick="runSort()"
+        >
+            ▶ Запустить
+        </button>
+        <button class="btn" onclick="resetSort()">↺ Сбросить</button>
+        <span class="status" id="sort-status"
+        >Выбери алгоритм и нажми «Запустить»</span
+        >
+        <span class="ops-counter" id="sort-ops">сравнений: 0 · обменов: 0</span>
+    </div>
+
+    <div
+            class="controls"
+            id="sort-playback"
+            style="display: none; align-items: center; gap: 8px"
+    >
+        <button class="btn" onclick="sortStepBack()" title="Шаг назад">
+            ◀ Назад
+        </button>
+        <input
+                type="range"
+                min="0"
+                max="0"
+                value="0"
+                id="sort-frame-slider"
+                style="flex: 1; min-width: 120px"
+                oninput="showSortFrame(+this.value)"
+        />
+        <button class="btn" onclick="sortStepFwd()" title="Шаг вперёд">
+            Вперёд ▶
+        </button>
+        <span class="ops-counter" id="sort-frame-label">кадр 0 / 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="speed-slider"
+                oninput="
                         document.getElementById('speed-label').textContent =
                             this.value
                     "
-                />
-                <span id="speed-label">3</span>
-            </div>
+        />
+        <span id="speed-label">3</span>
+    </div>
 
-            <div class="code-block" id="sort-code"></div>
-            <div id="sort-desc"></div>
-        </div>
+    <div class="code-block" id="sort-code"></div>
+    <div id="sort-desc"></div>
+</div>
 
-        <div class="section" id="section-search">
-            <div class="algo-grid">
-                <div
-                    class="algo-card selected"
-                    id="card-linear"
-                    onclick="selectSearch('linear')"
-                    data-desc="Перебирает элементы по одному. Работает на любом массиве."
-                >
-                    <div class="algo-name">Linear search</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-amber">O(n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">любой массив</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-binary"
-                    onclick="selectSearch('binary')"
-                    data-desc="Делит диапазон пополам. Требует отсортированного массива."
-                >
-                    <div class="algo-name">Binary search</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(log n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">отсортированный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-jump"
-                    onclick="selectSearch('jump')"
-                    data-desc="Прыгает блоками √n, затем линейно. Быстрее linear, проще binary."
-                >
-                    <div class="algo-name">Jump search</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(√n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">отсортированный</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-interpolation"
-                    onclick="selectSearch('interpolation')"
-                    data-desc="Интерполирует позицию по значению. O(log log n) на равномерных данных."
-                >
-                    <div class="algo-name">Interpolation</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(log log n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">равномерный массив</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-exponential"
-                    onclick="selectSearch('exponential')"
-                    data-desc="Растёт экспоненциально до нужного диапазона, затем binary search."
-                >
-                    <div class="algo-name">Exponential</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O(log n)</span
-                        ><span class="badge badge-green" style="font-size: 9px"
-                            >O(1)</span
-                        >
-                    </div>
-                    <div class="algo-sub">отсортированный</div>
-                </div>
-            </div>
-
-            <div class="legend" style="margin-top: 1rem">
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #4f8ef7"></div>
-                    обычный
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #f0a030"></div>
-                    проверяем
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #2a2a35"></div>
-                    исключён
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #3ec98a"></div>
-                    найден
-                </div>
-            </div>
-
-            <div class="search-row">
-                <span style="font-size: 12px; color: var(--muted)"
-                    >target =</span
-                >
-                <input
-                    type="number"
-                    id="search-target"
-                    value="42"
-                    min="1"
-                    max="99"
-                />
-                <button
-                    class="btn btn-primary"
-                    id="btn-search-run"
-                    onclick="runSearch()"
-                >
-                    ▶ Найти
-                </button>
-                <button class="btn" onclick="resetSearch()">↺ Сбросить</button>
-                <span class="status" id="search-status"></span>
-            </div>
-
-            <div class="viz-area" id="search-viz"></div>
-            <div class="code-block" id="search-code"></div>
-            <div id="search-desc"></div>
-        </div>
-
-        <div class="section" id="section-graph">
-            <div
-                class="algo-grid"
-                style="grid-template-columns: repeat(3, 1fr); max-width: 500px"
+<div class="section" id="section-search">
+    <div class="algo-grid">
+        <div
+                class="algo-card selected"
+                id="card-linear"
+                onclick="selectSearch('linear')"
+                data-desc="Перебирает элементы по одному. Работает на любом массиве."
+        >
+            <div class="algo-name">Linear search</div>
+            <div class="algo-meta">
+                        <span class="badge badge-mid">O(n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
             >
-                <div
-                    class="algo-card selected"
-                    id="card-bfs"
-                    onclick="selectGraph('bfs')"
-                    data-desc="Обходит граф уровнями. Находит кратчайший путь (по числу рёбер). Использует очередь."
-                >
-                    <div class="algo-name">BFS</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-cyan">O(V+E)</span
-                        ><span class="badge badge-cyan" style="font-size: 9px"
-                            >O(V)</span
-                        >
-                    </div>
-                    <div class="algo-sub">в ширину</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-dfs"
-                    onclick="selectGraph('dfs')"
-                    data-desc="Уходит как можно глубже перед возвратом. Использует стек (или рекурсию)."
-                >
-                    <div class="algo-name">DFS</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-cyan">O(V+E)</span
-                        ><span class="badge badge-cyan" style="font-size: 9px"
-                            >O(V)</span
-                        >
-                    </div>
-                    <div class="algo-sub">в глубину</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-dijkstra"
-                    onclick="selectGraph('dijkstra')"
-                    data-desc="Жадный алгоритм кратчайших путей. Работает на взвешенных графах без отрицательных рёбер."
-                >
-                    <div class="algo-name">Dijkstra</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-green">O((V+E)log V)</span>
-                    </div>
-                    <div class="algo-sub">кратчайший путь</div>
-                </div>
             </div>
+            <div class="algo-sub">любой массив</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-binary"
+                onclick="selectSearch('binary')"
+                data-desc="Делит диапазон пополам. Требует отсортированного массива."
+        >
+            <div class="algo-name">Binary search</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(log n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">отсортированный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-jump"
+                onclick="selectSearch('jump')"
+                data-desc="Прыгает блоками √n, затем линейно. Быстрее linear, проще binary."
+        >
+            <div class="algo-name">Jump search</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(√n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">отсортированный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-interpolation"
+                onclick="selectSearch('interpolation')"
+                data-desc="Интерполирует позицию по значению. O(log log n) на равномерных данных."
+        >
+            <div class="algo-name">Interpolation</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(log log n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">равномерный массив</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-exponential"
+                onclick="selectSearch('exponential')"
+                data-desc="Растёт экспоненциально до нужного диапазона, затем binary search."
+        >
+            <div class="algo-name">Exponential</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(log n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">отсортированный</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-ternary"
+                onclick="selectSearch('ternary')"
+                data-desc="Делит диапазон на 3 части. Два mid-a за один шаг. Применяют для унимодальных функций."
+        >
+            <div class="algo-name">Ternary search</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(log₃ n)</span
+                        ><span class="badge badge-fast"            >O(1)</span
+            >
+            </div>
+            <div class="algo-sub">отсортированный</div>
+        </div>
+    </div>
 
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #4f8ef7"></div>
-                    не посещена
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #f0a030"></div>
-                    в очереди
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #e85555"></div>
-                    текущая
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #3ec98a"></div>
-                    посещена
-                </div>
-                <div class="legend-item">
-                    <div
-                        class="legend-dot"
-                        style="
-                            background: #3ec98a;
+    <div class="legend" style="margin-top: 1rem">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--blue)"></div>
+            обычный
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            проверяем
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--excluded)"></div>
+            исключён
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            найден
+        </div>
+    </div>
+
+    <div class="search-row">
+                <span style="font-size: var(--text-md); color: var(--muted)"
+                >target =</span
+                >
+        <label for="search-target"></label><input
+                type="number"
+                class="input"
+                id="search-target"
+                value="42"
+                min="1"
+                max="99"
+        />
+        <button
+                class="btn btn-primary"
+                id="btn-search-run"
+                onclick="runSearch()"
+        >
+            ▶ Найти
+        </button>
+        <button class="btn" onclick="resetSearch()">↺ Сбросить</button>
+        <span class="status" id="search-status"></span>
+    </div>
+
+    <div class="viz-area" id="search-viz"></div>
+    <div class="code-block" id="search-code"></div>
+    <div id="search-desc"></div>
+</div>
+
+<div class="section" id="section-graph">
+    <div class="algo-grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr))">
+        <div
+                class="algo-card selected"
+                id="card-bfs"
+                onclick="selectGraph('bfs')"
+                data-desc="Обходит граф уровнями. Находит кратчайший путь (по числу рёбер). Использует очередь."
+        >
+            <div class="algo-name">BFS</div>
+            <div class="algo-meta">
+                        <span class="badge badge-graph">O(V+E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">в ширину</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-dfs"
+                onclick="selectGraph('dfs')"
+                data-desc="Уходит как можно глубже перед возвратом. Использует стек (или рекурсию)."
+        >
+            <div class="algo-name">DFS</div>
+            <div class="algo-meta">
+                        <span class="badge badge-graph">O(V+E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">в глубину</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-dijkstra"
+                onclick="selectGraph('dijkstra')"
+                data-desc="Жадный алгоритм кратчайших путей. Работает на взвешенных графах без отрицательных рёбер."
+        >
+            <div class="algo-name">Dijkstra</div>
+            <div class="algo-meta">
+                <span class="badge badge-fast">O((V+E)log V)</span>
+            </div>
+            <div class="algo-sub">кратчайший путь</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-bellmanFord"
+                onclick="selectGraph('bellmanFord')"
+                data-desc="Кратчайшие пути с отрицательными рёбрами. O(V·E). Обнаруживает отрицательные циклы."
+        >
+            <div class="algo-name">Bellman-Ford</div>
+            <div class="algo-meta">
+                        <span class="badge badge-mid">O(V·E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">отриц. веса</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-astar"
+                onclick="selectGraph('astar')"
+                data-desc="Дейкстра с эвристикой. Быстрее находит путь до конкретной цели. Стандарт в играх и GPS."
+        >
+            <div class="algo-name">A*</div>
+            <div class="algo-meta">
+                        <span class="badge badge-fast">O(E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">с эвристикой</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-toposort"
+                onclick="selectGraph('toposort')"
+                data-desc="Линейное упорядочение DAG. DFS-подход: добавляем в стек после обхода всех потомков."
+        >
+            <div class="algo-name">Topo Sort</div>
+            <div class="algo-meta">
+                        <span class="badge badge-graph">O(V+E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">DAG</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-floydWarshall"
+                onclick="selectGraph('floydWarshall')"
+                data-desc="Все кратчайшие пути за O(V³). Три вложенных цикла. Работает с отрицательными весами."
+        >
+            <div class="algo-name">Floyd-Warshall</div>
+            <div class="algo-meta">
+                        <span class="badge badge-slow">O(V³)</span
+                        ><span class="badge badge-mid"            >O(V²)</span
+            >
+            </div>
+            <div class="algo-sub">все пары</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-prim"
+                onclick="selectGraph('prim')"
+                data-desc="MST жадным методом: добавляем минимальное ребро к дереву. O(V²) или O(E log V) с кучей."
+        >
+            <div class="algo-name">Prim MST</div>
+            <div class="algo-meta">
+                        <span class="badge badge-special">O(V²)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">остов. дерево</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-kruskal"
+                onclick="selectGraph('kruskal')"
+                data-desc="MST через Union-Find. Сортируем рёбра, добавляем не создающие цикл. O(E log E)."
+        >
+            <div class="algo-name">Kruskal MST</div>
+            <div class="algo-meta">
+                        <span class="badge badge-special">O(E log E)</span
+                        ><span class="badge badge-graph"            >O(V)</span
+            >
+            </div>
+            <div class="algo-sub">Union-Find</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--blue)"></div>
+            не посещена
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            в очереди
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--red)"></div>
+            текущая
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            посещена
+        </div>
+        <div class="legend-item">
+            <div
+                    class="legend-dot"
+                    style="
+                            background: var(--green);
                             width: 20px;
                             height: 4px;
                             border-radius: 2px;
                         "
-                    ></div>
-                    relaxed
-                </div>
-            </div>
+            ></div>
+            relaxed
+        </div>
+    </div>
 
-            <div class="graph-viz">
-                <canvas id="graph-canvas" class="graph-canvas"></canvas>
-            </div>
+    <div class="graph-viz">
+        <canvas id="graph-canvas" class="graph-canvas"></canvas>
+    </div>
+    <div id="graph-matrix" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;overflow-x:auto"></div>
 
-            <div class="controls">
-                <button
-                    class="btn btn-primary"
-                    id="btn-graph-run"
-                    onclick="runGraph()"
-                >
-                    ▶ Запустить
-                </button>
-                <button
-                    class="btn btn-amber"
-                    id="btn-pause"
-                    onclick="toggleGraphPause()"
-                >
-                    ⏸ Пауза
-                </button>
-                <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
-                <button class="btn" onclick="resetGraph()">↺ Сбросить</button>
-                <button class="btn" onclick="generateGraph()">
-                    ⟳ Новый граф
-                </button>
-                <span class="status" id="graph-status"></span>
-                <span class="ops-counter" id="graph-ops">операций: 0</span>
-            </div>
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-graph-run"
+                onclick="runGraph()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-pause"
+                onclick="toggleGraphPause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
+        <button class="btn" onclick="resetGraph()">↺ Сбросить</button>
+        <button class="btn" onclick="generateGraph()">
+            ⟳ Новый граф
+        </button>
+        <button class="btn" id="btn-graph-edit" onclick="toggleGraphEdit()">
+            ✏️ Правка
+        </button>
+        <button class="btn" onclick="clearGraph()">🗑 Очистить</button>
+        <span class="status" id="graph-status"></span>
+        <span class="ops-counter" id="graph-ops">операций: 0</span>
+    </div>
 
-            <div class="speed-row">
-                <span>Скорость</span>
-                <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value="3"
-                    id="graph-speed-slider"
-                    oninput="
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="graph-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="graph-speed-slider"
+                oninput="
                         document.getElementById(
                             'graph-speed-label',
                         ).textContent = this.value
                     "
-                />
-                <span id="graph-speed-label">3</span>
-            </div>
+        />
+        <span id="graph-speed-label">3</span>
+    </div>
 
-            <div class="code-block" id="graph-code"></div>
-            <div id="graph-desc"></div>
-        </div>
+    <div class="code-block" id="graph-code"></div>
+    <div id="graph-desc"></div>
+</div>
 
-        <div class="section" id="section-dp">
-            <div
-                class="algo-grid"
-                style="
+<div class="section" id="section-dp">
+    <div
+            class="algo-grid"
+            style="
                     grid-template-columns: repeat(
                         auto-fill,
                         minmax(160px, 1fr)
                     );
                     max-width: 700px;
                 "
+    >
+        <div
+                class="algo-card selected"
+                id="card-fib"
+                onclick="selectDP('fib')"
+                data-desc="Вычисляет числа Фибоначчи снизу-вверх. Базовый пример DP с линейной памятью."
+        >
+            <div class="algo-name">Fibonacci</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n)</span
+                        ><span class="badge badge-dp"            >O(n)</span
             >
-                <div
-                    class="algo-card selected"
-                    id="card-fib"
-                    onclick="selectDP('fib')"
-                    data-desc="Вычисляет числа Фибоначчи снизу-вверх. Базовый пример DP с линейной памятью."
-                >
-                    <div class="algo-name">Fibonacci</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-pink">O(n)</span
-                        ><span class="badge badge-pink" style="font-size: 9px"
-                            >O(n)</span
-                        >
-                    </div>
-                    <div class="algo-sub">мемоизация</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-knapsack"
-                    onclick="selectDP('knapsack')"
-                    data-desc="Максимизирует ценность предметов в рюкзаке. 2D таблица dp[i][w]."
-                >
-                    <div class="algo-name">0/1 Knapsack</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-pink">O(n×W)</span
-                        ><span class="badge badge-pink" style="font-size: 9px"
-                            >O(n×W)</span
-                        >
-                    </div>
-                    <div class="algo-sub">табличный метод</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-lcs"
-                    onclick="selectDP('lcs')"
-                    data-desc="Наибольшая общая подпоследовательность двух массивов. 2D таблица."
-                >
-                    <div class="algo-name">LCS</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-pink">O(m×n)</span
-                        ><span class="badge badge-pink" style="font-size: 9px"
-                            >O(m×n)</span
-                        >
-                    </div>
-                    <div class="algo-sub">подпоследовательность</div>
-                </div>
-                <div
-                    class="algo-card"
-                    id="card-lis"
-                    onclick="selectDP('lis')"
-                    data-desc="Наибольшая возрастающая подпоследовательность. 1D таблица dp[i]."
-                >
-                    <div class="algo-name">LIS</div>
-                    <div class="algo-meta">
-                        <span class="badge badge-pink">O(n²)</span
-                        ><span class="badge badge-pink" style="font-size: 9px"
-                            >O(n)</span
-                        >
-                    </div>
-                    <div class="algo-sub">возрастающая</div>
-                </div>
             </div>
-
-            <div class="legend">
-                <div class="legend-item">
-                    <div
-                        class="legend-dot"
-                        style="background: var(--surface2)"
-                    ></div>
-                    не вычислено
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #f0a030"></div>
-                    вычисляется
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #4f8ef7"></div>
-                    зависимость
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: #3ec98a"></div>
-                    вычислено
-                </div>
+            <div class="algo-sub">мемоизация</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-knapsack"
+                onclick="selectDP('knapsack')"
+                data-desc="Максимизирует ценность предметов в рюкзаке. 2D таблица dp[i][w]."
+        >
+            <div class="algo-name">0/1 Knapsack</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n×W)</span
+                        ><span class="badge badge-dp"            >O(n×W)</span
+            >
             </div>
-
-            <div class="dp-viz" id="dp-viz"></div>
-
-            <div class="controls">
-                <button
-                    class="btn btn-primary"
-                    id="btn-dp-run"
-                    onclick="runDP()"
-                >
-                    ▶ Запустить
-                </button>
-                <button
-                    class="btn btn-amber"
-                    id="btn-dp-pause"
-                    onclick="toggleDPPause()"
-                >
-                    ⏸ Пауза
-                </button>
-                <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
-                <button class="btn" onclick="resetDP()">↺ Сбросить</button>
-                <span class="status" id="dp-status"></span>
-                <span class="ops-counter" id="dp-ops">операций: 0</span>
+            <div class="algo-sub">табличный метод</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-lcs"
+                onclick="selectDP('lcs')"
+                data-desc="Наибольшая общая подпоследовательность двух массивов. 2D таблица."
+        >
+            <div class="algo-name">LCS</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(m×n)</span
+                        ><span class="badge badge-dp"            >O(m×n)</span
+            >
             </div>
+            <div class="algo-sub">подпоследовательность</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-lis"
+                onclick="selectDP('lis')"
+                data-desc="Наибольшая возрастающая подпоследовательность. 1D таблица dp[i]."
+        >
+            <div class="algo-name">LIS</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n²)</span
+                        ><span class="badge badge-dp"            >O(n)</span
+            >
+            </div>
+            <div class="algo-sub">возрастающая</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-coinChange"
+                onclick="selectDP('coinChange')"
+                data-desc="Минимум монет для заданной суммы. 1D таблица dp[amount]. Классика DP."
+        >
+            <div class="algo-name">Coin Change</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n·coins)</span
+                        ><span class="badge badge-dp"            >O(n)</span
+            >
+            </div>
+            <div class="algo-sub">мин. монет</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-editDistance"
+                onclick="selectDP('editDistance')"
+                data-desc="Расстояние Левенштейна: минимум операций вставки, удаления, замены. 2D таблица."
+        >
+            <div class="algo-name">Edit Distance</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(m·n)</span
+                        ><span class="badge badge-dp"            >O(m·n)</span
+            >
+            </div>
+            <div class="algo-sub">Levenshtein</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-matrixChain"
+                onclick="selectDP('matrixChain')"
+                data-desc="Оптимальный порядок умножения матриц. Interval DP. dp[i][j] по диагоналям."
+        >
+            <div class="algo-name">Matrix Chain</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n³)</span
+                        ><span class="badge badge-dp"            >O(n²)</span
+            >
+            </div>
+            <div class="algo-sub">interval DP</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-rodCutting"
+                onclick="selectDP('rodCutting')"
+                data-desc="Оптимальная нарезка стержня для максимальной выручки. Вариант неограниченного рюкзака."
+        >
+            <div class="algo-name">Rod Cutting</div>
+            <div class="algo-meta">
+                        <span class="badge badge-dp">O(n²)</span
+                        ><span class="badge badge-dp"            >O(n)</span
+            >
+            </div>
+            <div class="algo-sub">разрезание</div>
+        </div>
+    </div>
 
-            <div class="speed-row">
-                <span>Скорость</span>
-                <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value="3"
-                    id="dp-speed-slider"
-                    oninput="
+    <div class="legend">
+        <div class="legend-item">
+            <div
+                    class="legend-dot"
+                    style="background: var(--surface2)"
+            ></div>
+            не вычислено
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            вычисляется
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--blue)"></div>
+            зависимость
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            вычислено
+        </div>
+    </div>
+
+    <div class="dp-viz" id="dp-viz"></div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-dp-run"
+                onclick="runDP()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-dp-pause"
+                onclick="toggleDPPause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
+        <button class="btn" onclick="resetDP()">↺ Сбросить</button>
+        <span class="status" id="dp-status"></span>
+        <span class="ops-counter" id="dp-ops">операций: 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="dp-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="dp-speed-slider"
+                oninput="
                         document.getElementById('dp-speed-label').textContent =
                             this.value
                     "
-                />
-                <span id="dp-speed-label">3</span>
+        />
+        <span id="dp-speed-label">3</span>
+    </div>
+
+    <div class="code-block" id="dp-code"></div>
+    <div id="dp-desc"></div>
+</div>
+
+<div class="section" id="section-hash">
+    <div class="algo-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 500px">
+        <div
+                class="algo-card selected"
+                id="card-hashChaining"
+                onclick="selectHash('hashChaining')"
+                data-desc="Цепочки: каждая ячейка хранит связный список элементов с одинаковым хешем."
+        >
+            <div class="algo-name">Separate Chaining</div>
+            <div class="algo-meta">
+                        <span class="badge badge-aux">O(1+α)</span
+                        ><span class="badge badge-aux"            >O(n+m)</span
+            >
             </div>
-
-            <div class="code-block" id="dp-code"></div>
-            <div id="dp-desc"></div>
+            <div class="algo-sub">цепочки</div>
         </div>
+        <div
+                class="algo-card"
+                id="card-hashLinear"
+                onclick="selectHash('hashLinear')"
+                data-desc="Открытая адресация: при коллизии ищем следующую свободную ячейку линейно."
+        >
+            <div class="algo-name">Linear Probing</div>
+            <div class="algo-meta">
+                        <span class="badge badge-aux">O(1/(1-α))</span
+                        ><span class="badge badge-aux"            >O(m)</span
+            >
+            </div>
+            <div class="algo-sub">открытая адресация</div>
+        </div>
+    </div>
 
-        <script src="algo-code.js"></script>
-        <script src="algo-desc.js"></script>
-        <script src="algo-viz.js"></script>
-        <script src="algo-graph-dp.js"></script>
-    </body>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            вычисляем хеш
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            вставлено
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--red)"></div>
+            коллизия
+        </div>
+    </div>
+
+    <div class="custom-input-row">
+        <label>Ключи для вставки:</label>
+        <label for="hash-keys-input"></label><input
+                type="text"
+                class="input"
+                id="hash-keys-input"
+                placeholder="напр. 15, 11, 27, 4, 33"
+                oninput="resetHash()"
+        />
+        <label>Размер таблицы:</label>
+        <input
+                type="number"
+                class="input"
+                id="hash-size-input"
+                min="5"
+                max="31"
+                value="11"
+                style="width:60px"
+                oninput="resetHash()"
+        />
+    </div>
+
+    <div class="dp-viz" id="hash-viz" style="min-height:200px"></div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-hash-run"
+                onclick="runHash()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-hash-pause"
+                onclick="toggleHashPause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="resetHash()">↺ Сбросить</button>
+        <span class="status" id="hash-status">Нажми «Запустить»</span>
+        <span class="ops-counter" id="hash-ops">операций: 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="hash-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="hash-speed-slider"
+                oninput="
+                        document.getElementById('hash-speed-label').textContent =
+                            this.value
+                    "
+        />
+        <span id="hash-speed-label">3</span>
+    </div>
+
+    <div class="code-block" id="hash-code"></div>
+    <div id="hash-desc"></div>
+</div>
+
+<div class="section" id="section-backtrack">
+    <div class="algo-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 500px">
+        <div
+                class="algo-card selected"
+                id="card-nqueens"
+                onclick="selectBacktrack('nqueens')"
+                data-desc="N ферзей: перебор с возвратом расставляет ферзей по столбцам, отсекая бьющиеся клетки."
+        >
+            <div class="algo-name">N-Queens</div>
+            <div class="algo-meta">
+                <span class="badge badge-time">O(N!)</span
+                ><span class="badge badge-aux">O(N)</span>
+            </div>
+            <div class="algo-sub">перебор с возвратом</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            пробуем клетку
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            ферзь поставлен
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--red)"></div>
+            конфликт / откат
+        </div>
+    </div>
+
+    <div class="custom-input-row">
+        <label for="backtrack-size-input">Размер доски N:</label>
+        <input
+                type="number"
+                class="input"
+                id="backtrack-size-input"
+                min="4"
+                max="8"
+                value="6"
+                style="width:60px"
+                oninput="resetBacktrack()"
+        />
+    </div>
+
+    <div class="dp-viz" id="backtrack-viz" style="min-height:200px"></div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-backtrack-run"
+                onclick="runBacktrack()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-backtrack-pause"
+                onclick="toggleBacktrackPause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
+        <button class="btn" onclick="resetBacktrack()">↺ Сбросить</button>
+        <span class="status" id="backtrack-status">Нажми «Запустить»</span>
+        <span class="ops-counter" id="backtrack-ops">операций: 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="backtrack-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="backtrack-speed-slider"
+                oninput="
+                        document.getElementById('backtrack-speed-label').textContent =
+                            this.value
+                    "
+        />
+        <span id="backtrack-speed-label">3</span>
+    </div>
+
+    <div class="code-block" id="backtrack-code"></div>
+    <div id="backtrack-desc"></div>
+</div>
+
+<div class="section" id="section-string">
+    <div class="algo-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 500px">
+        <div
+                class="algo-card selected"
+                id="card-kmp"
+                onclick="selectString('kmp')"
+                data-desc="KMP: префикс-функция (LPS) позволяет искать без отката указателя текста."
+        >
+            <div class="algo-name">KMP</div>
+            <div class="algo-meta">
+                <span class="badge badge-time">O(n+m)</span
+                ><span class="badge badge-aux">O(m)</span>
+            </div>
+            <div class="algo-sub">префикс-функция</div>
+        </div>
+        <div
+                class="algo-card"
+                id="card-rabinkarp"
+                onclick="selectString('rabinkarp')"
+                data-desc="Рабин–Карп: сравнение по rolling hash с проверкой при совпадении хешей."
+        >
+            <div class="algo-name">Rabin–Karp</div>
+            <div class="algo-meta">
+                <span class="badge badge-time">O(n+m)</span
+                ><span class="badge badge-aux">O(1)</span>
+            </div>
+            <div class="algo-sub">rolling hash</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            сравниваем
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            совпадение
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--red)"></div>
+            несовпадение
+        </div>
+    </div>
+
+    <div class="custom-input-row">
+        <label for="string-text-input">Текст:</label>
+        <input
+                type="text"
+                class="input"
+                id="string-text-input"
+                placeholder="ABABDABACDABABCABAB"
+                oninput="resetString()"
+        />
+        <label for="string-pat-input">Шаблон:</label>
+        <input
+                type="text"
+                class="input"
+                id="string-pat-input"
+                placeholder="ABABCABAB"
+                style="width:120px"
+                oninput="resetString()"
+        />
+    </div>
+
+    <div class="dp-viz" id="string-viz" style="min-height:160px"></div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-string-run"
+                onclick="runString()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-string-pause"
+                onclick="toggleStringPause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
+        <button class="btn" onclick="resetString()">↺ Сбросить</button>
+        <span class="status" id="string-status">Нажми «Запустить»</span>
+        <span class="ops-counter" id="string-ops">операций: 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="string-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="string-speed-slider"
+                oninput="
+                        document.getElementById('string-speed-label').textContent =
+                            this.value
+                    "
+        />
+        <span id="string-speed-label">3</span>
+    </div>
+
+    <div class="code-block" id="string-code"></div>
+    <div id="string-desc"></div>
+</div>
+
+<div class="section" id="section-tree">
+    <div class="algo-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 500px">
+        <div
+                class="algo-card selected"
+                id="card-bst"
+                onclick="selectTree('bst')"
+                data-desc="BST: левое поддерево меньше узла, правое больше; поиск и вставка спускаются от корня."
+        >
+            <div class="algo-name">Binary Search Tree</div>
+            <div class="algo-meta">
+                <span class="badge badge-time">O(log n)</span
+                ><span class="badge badge-aux">O(n)</span>
+            </div>
+            <div class="algo-sub">вставка + поиск</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--amber)"></div>
+            сравниваем
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--purple)"></div>
+            путь спуска
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green)"></div>
+            вставлено / найдено
+        </div>
+    </div>
+
+    <div class="custom-input-row">
+        <label for="tree-values-input">Значения:</label>
+        <input
+                type="text"
+                class="input"
+                id="tree-values-input"
+                placeholder="50, 30, 70, 20, 40, 60, 80, 35"
+                oninput="resetTree()"
+        />
+        <label for="tree-target-input">Искать:</label>
+        <input
+                type="number"
+                class="input"
+                id="tree-target-input"
+                value="35"
+                style="width:70px"
+                oninput="resetTree()"
+        />
+    </div>
+
+    <div class="graph-viz">
+        <canvas id="tree-canvas" class="graph-canvas" style="height:280px"></canvas>
+    </div>
+
+    <div class="controls">
+        <button
+                class="btn btn-primary"
+                id="btn-tree-run"
+                onclick="runTree()"
+        >
+            ▶ Запустить
+        </button>
+        <button
+                class="btn btn-amber"
+                id="btn-tree-pause"
+                onclick="toggleTreePause()"
+        >
+            ⏸ Пауза
+        </button>
+        <button class="btn" onclick="stepOnce()">⏭ Шаг</button>
+        <button class="btn" onclick="resetTree()">↺ Сбросить</button>
+        <span class="status" id="tree-status">Нажми «Запустить»</span>
+        <span class="ops-counter" id="tree-ops">операций: 0</span>
+    </div>
+
+    <div class="speed-row">
+        <span>Скорость</span>
+        <label for="tree-speed-slider"></label><input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                id="tree-speed-slider"
+                oninput="
+                        document.getElementById('tree-speed-label').textContent =
+                            this.value
+                    "
+        />
+        <span id="tree-speed-label">3</span>
+    </div>
+
+    <div class="code-block" id="tree-code"></div>
+    <div id="tree-desc"></div>
+</div>
+
+<!-- ?v= cache-busting: bump APP_VERSION when scripts change so browsers
+     (and the dev preview) don't run a stale cached bundle.
+     algo-core.js (pure, unit-tested logic) loads first so the others can use it. -->
+<script src="algo-core.js?v=11"></script>
+<script src="algo-code.js?v=11"></script>
+<script src="algo-desc.js?v=11"></script>
+<script src="algo-viz.js?v=11"></script>
+<script src="algo-graph-dp.js?v=11"></script>
+<script src="algo-hash.js?v=11"></script>
+<script src="algo-backtrack.js?v=11"></script>
+<script src="algo-strings.js?v=11"></script>
+<script src="algo-trees.js?v=11"></script>
+</body>
 </html>
