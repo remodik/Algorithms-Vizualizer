@@ -1,8 +1,3 @@
-// ── Trees section: Binary Search Tree ─────────────────────────────────────
-// Animated insert + search on a BST drawn to a canvas. Node x-coordinates come
-// from an in-order index (so order reads left→right); y from depth. Shares the
-// global run/pause machinery (running, paused, pauseResolve, opsCount, delayP).
-
 const DEFAULT_BST_VALUES = [50, 30, 70, 20, 40, 60, 80, 35];
 const DEFAULT_BST_TARGET = 35;
 const TREE_NODE_R = 17;
@@ -30,7 +25,6 @@ function bstNewNode(val) {
   return { val, left: null, right: null, x: 0, y: 0, state: "default" };
 }
 
-// Non-animated build delegates to the unit-tested pure core (AlgoCore).
 function bstInsertSilent(val) {
   bstRoot = AlgoCore.bstInsert(bstRoot, val);
 }
@@ -62,7 +56,6 @@ function sizeTreeCanvas() {
   return c;
 }
 
-// Assign x by in-order position, y by depth.
 function layoutTree() {
   const c = document.getElementById("tree-canvas");
   if (!c) return;
@@ -94,7 +87,6 @@ function drawTree() {
     inserted: PALETTE.green,
   };
 
-  // Edges first.
   ctx.lineWidth = 2;
   ctx.strokeStyle = "rgba(255,255,255,0.18)";
   bstForEach(bstRoot, (node) => {
@@ -108,7 +100,6 @@ function drawTree() {
     }
   });
 
-  // Nodes.
   bstForEach(bstRoot, (node) => {
     ctx.beginPath();
     ctx.arc(node.x, node.y, TREE_NODE_R, 0, 2 * Math.PI);
@@ -150,7 +141,6 @@ function resetTree() {
   opsCount = 0;
   updateOpsDisplay("tree");
 
-  // Build the tree instantly so there is something to see before running.
   bstRoot = null;
   for (const v of getBSTValues()) bstInsertSilent(v);
   drawTree();
@@ -255,7 +245,6 @@ async function runTree() {
       +document.getElementById("tree-speed-slider").value - 1
     ];
 
-  // Phase 1: build the tree from scratch, animated.
   bstRoot = null;
   drawTree();
   const values = getBSTValues();
@@ -268,7 +257,6 @@ async function runTree() {
     drawTree();
   }
 
-  // Phase 2: search for the target.
   if (running) {
     const target = getBSTTarget();
     status(`Дерево построено. Ищем ${target}…`);

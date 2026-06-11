@@ -1,17 +1,6 @@
-// ── Pure algorithm core (no DOM) ─────────────────────────────────────────
-// Canonical, side-effect-free implementations of the algorithms the
-// visualizer animates. The viz files own the *animated* step-by-step versions
-// (which are inherently coupled to rendering); this module is the plain,
-// unit-tested reference and is reused by the app where a non-animated result
-// is all that's needed (e.g. building a BST, hashing a key).
-//
-// Loads as a classic <script> in the browser (assigns globalThis.AlgoCore) and
-// as an ESM side-effect import in Node tests (which then read globalThis).
-
 (function (root) {
   "use strict";
 
-  // ---- Sorting (return a new sorted array; never mutate the input) ----
   const bubbleSort = (input) => {
     const a = input.slice();
     for (let i = 0; i < a.length - 1; i++)
@@ -96,7 +85,6 @@
     return true;
   };
 
-  // ---- Searching (return index, or -1) ----
   const linearSearch = (a, target) => {
     for (let i = 0; i < a.length; i++) if (a[i] === target) return i;
     return -1;
@@ -114,8 +102,6 @@
     return -1;
   };
 
-  // ---- Binary Search Tree ----
-  // Immutable-root style: insert returns the (possibly new) root.
   const bstInsert = (root, val) => {
     const node = { val, left: null, right: null };
     if (!root) return node;
@@ -133,7 +119,7 @@
           return root;
         }
         cur = cur.right;
-      } else return root; // duplicate ignored
+      } else return root;
     }
   };
 
@@ -163,7 +149,6 @@
     return out;
   };
 
-  // ---- String matching ----
   const kmpBuildLPS = (pat) => {
     const lps = new Array(pat.length).fill(0);
     let len = 0;
@@ -217,7 +202,6 @@
     return -1;
   };
 
-  // ---- Backtracking: N-Queens (first solution as board[col] = row) ----
   const solveNQueens = (N) => {
     const board = new Array(N).fill(-1);
     const isSafe = (row, col) => {
@@ -241,7 +225,6 @@
     return place(0) ? board.slice() : null;
   };
 
-  // ---- Disjoint Set Union (union by rank + path compression) ----
   const makeDSU = (n) => {
     const parent = Array.from({ length: n }, (_, i) => i);
     const rank = new Array(n).fill(0);
@@ -264,7 +247,6 @@
     return { find, union, connected: (a, b) => find(a) === find(b) };
   };
 
-  // ---- Hashing ----
   const hashFn = (key, size) => ((key % size) + size) % size;
 
   const AlgoCore = {

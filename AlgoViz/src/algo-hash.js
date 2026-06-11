@@ -21,10 +21,6 @@ function getHashSize() {
   return !isNaN(v) && v >= 5 && v <= 31 ? v : DEFAULT_HASH_SIZE;
 }
 
-// Размер таблицы передаётся явно: во время прогона он зафиксирован, поэтому
-// hashFn не должен перечитывать поле ввода (иначе изменение размера в процессе
-// даёт индекс за пределами массива). Без аргумента — берём текущий из DOM.
-// Сама хеш-функция — из протестированного ядра AlgoCore.
 function hashFn(key, size) {
   return AlgoCore.hashFn(key, size ?? getHashSize());
 }
@@ -308,7 +304,4 @@ function renderChainSlot(slotIdx, newKey) {
   });
 }
 
-// Loads last of all scripts, so this `load` handler runs after the default
-// init in algo-graph-dp.js — letting applyState() override the defaults with
-// the user's saved language / speeds and any deep-linked algorithm.
 window.addEventListener("load", applyState);

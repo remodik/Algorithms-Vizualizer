@@ -1,11 +1,6 @@
-// ── String matching section: KMP + Rabin-Karp ────────────────────────────
-// Renders the text as a fixed row of character cells and the pattern as a row
-// that shifts under it. Shares the global run/pause machinery (running, paused,
-// pauseResolve, opsCount, delayP, togglePauseGeneric).
-
 const DEFAULT_STR_TEXT = "ABABDABACDABABCABAB";
 const DEFAULT_STR_PAT = "ABABCABAB";
-const STR_CELL = 26; // px per character cell
+const STR_CELL = 26;
 
 function getStrText() {
   const el = document.getElementById("string-text-input");
@@ -55,7 +50,6 @@ function buildStringViz() {
   wrap.style.cssText =
     "overflow-x:auto;padding:6px 0;display:flex;flex-direction:column;gap:6px";
 
-  // Text row (indices + chars).
   const idxRow = document.createElement("div");
   idxRow.style.cssText = "display:flex;gap:3px";
   const textRow = document.createElement("div");
@@ -73,7 +67,6 @@ function buildStringViz() {
     textRow.appendChild(c);
   }
 
-  // Pattern row, shifted via left margin.
   const patRow = document.createElement("div");
   patRow.id = "str-pat-row";
   patRow.style.cssText = "display:flex;gap:3px;transition:margin-left 0.2s";
@@ -92,7 +85,6 @@ function buildStringViz() {
   wrap.appendChild(patRow);
   viz.appendChild(wrap);
 
-  // Optional LPS array readout for KMP.
   if (currentString === "kmp") {
     const lps = document.createElement("div");
     lps.id = "str-lps";
@@ -183,7 +175,6 @@ async function runKMP(text, pat, d, status) {
   const n = text.length,
     m = pat.length;
 
-  // ── Build LPS ──
   const lps = new Array(m).fill(0);
   let len = 0;
   status("Строим префикс-функцию (LPS)…");
@@ -206,7 +197,6 @@ async function runKMP(text, pat, d, status) {
   }
   if (lpsEl) lpsEl.textContent = "LPS: [" + lps.join(", ") + "]";
 
-  // ── Match ──
   let i = 0,
     j = 0;
   while (i < n && running) {
@@ -233,15 +223,11 @@ async function runKMP(text, pat, d, status) {
     } else {
       paintStrCell("str-t-", i, "rgba(255,255,255,0.03)", "var(--text)");
       if (j > 0) {
-        // reset highlight on the pattern cells we leave behind
         for (let k = 0; k < m; k++)
-          paintStrCell(
-            "str-p-",
-            k,
-            withAlpha("blue", 0.12),
-            "var(--text)",
-          );
-        status(`Несовпадение → прыжок по LPS: j = lps[${j - 1}] = ${lps[j - 1]}`);
+          paintStrCell("str-p-", k, withAlpha("blue", 0.12), "var(--text)");
+        status(
+          `Несовпадение → прыжок по LPS: j = lps[${j - 1}] = ${lps[j - 1]}`,
+        );
         j = lps[j - 1];
       } else {
         i++;
@@ -275,7 +261,6 @@ async function runRabinKarp(text, pat, d, status) {
 
   for (let s = 0; s <= n - m && running; s++) {
     setPatternShift(s);
-    // highlight current window
     for (let k = 0; k < m; k++)
       paintStrCell("str-t-", s + k, withAlpha("amber", 0.25), "var(--amber)");
     status(`Окно [${s}..${s + m - 1}]: хеш=${winH}, шаблон=${patH}`);
@@ -284,7 +269,6 @@ async function runRabinKarp(text, pat, d, status) {
     updateOpsDisplay("string");
 
     if (winH === patH) {
-      // verify characters (guard against hash collisions)
       const match = text.slice(s, s + m) === pat;
       status(
         match
@@ -302,13 +286,11 @@ async function runRabinKarp(text, pat, d, status) {
       if (match) return;
     }
 
-    // clear window highlight before rolling
     for (let k = 0; k < m; k++)
       paintStrCell("str-t-", s + k, "rgba(255,255,255,0.03)", "var(--text)");
 
     if (s < n - m) {
-      winH =
-        (B * (winH - text.charCodeAt(s) * h) + text.charCodeAt(s + m)) % M;
+      winH = (B * (winH - text.charCodeAt(s) * h) + text.charCodeAt(s + m)) % M;
       if (winH < 0) winH += M;
     }
     await delayP(d() * 0.4);

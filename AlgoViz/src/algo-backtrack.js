@@ -1,8 +1,3 @@
-// ── Backtracking section: N-Queens ───────────────────────────────────────
-// Places N queens column-by-column, trying each row, pruning unsafe cells and
-// backtracking on dead ends. Shares the global run/pause machinery (running,
-// paused, pauseResolve, opsCount, delayP, togglePauseGeneric) with the others.
-
 const DEFAULT_QUEENS_N = 6;
 
 function getQueensN() {
@@ -94,7 +89,6 @@ function resetBacktrack() {
   renderDesc("backtrack-desc", currentBacktrack);
 }
 
-// Visual helpers operate on the board cells by (row, col).
 function qCell(row, col) {
   return document.getElementById("q-" + row + "-" + col);
 }
@@ -131,7 +125,7 @@ async function runBacktrack() {
 
   const N = getQueensN();
   buildQueensBoard();
-  const board = new Array(N).fill(-1); // board[col] = row
+  const board = new Array(N).fill(-1);
 
   const isSafe = (row, col) => {
     for (let c = 0; c < col; c++) {
@@ -144,10 +138,9 @@ async function runBacktrack() {
 
   async function place(col) {
     if (!running) return false;
-    if (col === N) return true; // all queens placed
+    if (col === N) return true;
 
     for (let row = 0; row < N && running; row++) {
-      // Trying this cell.
       paintCell(row, col, withAlpha("amber", 0.3));
       status(`Столбец ${col}: пробуем строку ${row}`);
       await delayP(d());
@@ -163,14 +156,12 @@ async function runBacktrack() {
 
         if (await place(col + 1)) return true;
 
-        // Dead end — backtrack.
         board[col] = -1;
         paintCell(row, col, withAlpha("red", 0.25), "");
         status(`Откат: убираем ферзя с (стр ${row}, ст ${col})`);
         await delayP(d());
         paintCell(row, col, cellBase(row, col), "");
       } else {
-        // Conflict — prune.
         paintCell(row, col, withAlpha("red", 0.25), "✕");
         await delayP(d());
         paintCell(row, col, cellBase(row, col), "");
@@ -183,7 +174,6 @@ async function runBacktrack() {
 
   if (running) {
     if (solved) {
-      // Re-affirm the final solution coloring.
       for (let col = 0; col < N; col++) {
         if (board[col] >= 0)
           paintCell(board[col], col, withAlpha("green", 0.35), "♛");

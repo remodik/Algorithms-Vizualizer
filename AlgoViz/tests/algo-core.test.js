@@ -1,6 +1,3 @@
-// Unit tests for the pure algorithm core. Run with: npm test  (node --test)
-// algo-core.js is a classic script that assigns globalThis.AlgoCore; importing
-// it for side effect populates that global, which we then read here.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import "../src/algo-core.js";
@@ -18,7 +15,13 @@ const SAMPLES = [
   [50, 40, 30, 20, 10],
 ];
 
-const sorts = ["bubbleSort", "insertionSort", "mergeSort", "quickSort", "heapSort"];
+const sorts = [
+  "bubbleSort",
+  "insertionSort",
+  "mergeSort",
+  "quickSort",
+  "heapSort",
+];
 
 for (const name of sorts) {
   test(`${name}: matches Array.prototype.sort and is pure`, () => {
@@ -56,11 +59,12 @@ test("binarySearch (sorted input)", () => {
 test("BST: insert/search/inorder", () => {
   const vals = [50, 30, 70, 20, 40, 60, 80, 35];
   const root = C.bstFromArray(vals);
-  // in-order traversal yields the sorted, de-duplicated set
-  assert.deepEqual(C.bstInorder(root), [...new Set(vals)].sort((a, b) => a - b));
+  assert.deepEqual(
+    C.bstInorder(root),
+    [...new Set(vals)].sort((a, b) => a - b),
+  );
   assert.equal(C.bstSearch(root, 35).val, 35);
   assert.equal(C.bstSearch(root, 99), null);
-  // duplicates are ignored
   const r2 = C.bstInsert(C.bstFromArray([5, 5, 5]), 5);
   assert.deepEqual(C.bstInorder(r2), [5]);
 });
